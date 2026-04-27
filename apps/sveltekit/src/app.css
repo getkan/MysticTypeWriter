@@ -1,0 +1,23 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  background-image:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(22, 163, 74, 0.25),
+      transparent 45%
+    ),
+    radial-gradient(circle at 75% 0%, rgba(14, 116, 144, 0.3), transparent 50%),
+    linear-gradient(135deg, #020617 0%, #0f172a 40%, #111827 100%);
+}

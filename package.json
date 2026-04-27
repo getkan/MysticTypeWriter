@@ -1,0 +1,17 @@
+{
+  "name": "forwardtothevoid",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c cyan,magenta \"npm run dev -w @forward/server\" \"npm run dev -w @forward/web\"",
+    "build": "npm run build -w @forward/server && npm run build -w @forward/web",
+    "start": "npm run start -w @forward/server"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "concurrently": "^9.1.2"
+  }
+}
