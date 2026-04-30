@@ -24,13 +24,14 @@ The current project includes:
 - [x] Implement shared in-app typewriter configuration state
 - [x] Create typewriter basic ui and functionality
 - [x] Implement text disappearance based on config
-- [ ] Add ability to view final text after completion
-- [ ] Add option to share final text to social media
-- [ ] Add animations and sound effects
+- [x] Add ability to view final text after completion
+- [x] ~~Add option to share final text to social media~~
+- [x] Add animations and sound effects
+- [x] Add timeout for inactivity
 
 ## Future ideas
 - Add page disappearance mode
-- Add timeout for inactivity
+- Work on suggestions in docs
 
 ## Tech stack
 

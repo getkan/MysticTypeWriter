@@ -25,17 +25,11 @@
 	let configState = $state(config());
 </script>
 
-<h1
-	class="bg-background flex items-center gap-2 text-[1.5rem] font-bold md:hidden"
->
-	<Typewriter />
-	<span>Mystic Type-Writer</span>
-</h1>
 <div
 	class="border-offwhite bg-background relative flex flex-col gap-8 rounded-lg border-2 p-8 md:min-w-200"
 >
 	<h1
-		class="bg-background absolute -top-8 hidden items-center gap-2 px-4 text-[2rem] font-bold md:flex"
+		class="bg-background absolute -top-4 left-2 flex transform flex-nowrap items-center gap-2 px-4 text-[1.5rem] font-bold sm:-top-8 sm:text-[2rem]"
 	>
 		<Typewriter />
 		<span class="whitespace-nowrap">Mystic Type-Writer</span>
