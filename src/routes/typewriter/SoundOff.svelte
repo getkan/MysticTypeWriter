@@ -4,7 +4,11 @@
 		title?: string;
 	};
 
-	let { size = '1em', title = 'Sound off', ...rest }: Props & Record<string, unknown> = $props();
+	let {
+		size = "1em",
+		title = "Sound off",
+		...rest
+	}: Props & Record<string, unknown> = $props();
 </script>
 
 <svg

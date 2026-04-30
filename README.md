@@ -1,4 +1,4 @@
-# Forward to the Void
+# Mystic Type-Writer
 
 A minimal SvelteKit app for a constrained writing experience inspired by a disappearing typewriter.
 
@@ -6,7 +6,7 @@ The app starts on a configuration screen where the user selects how the writing 
 
 ## Concept
 
-Forward to the Void is a writing tool built around a simple rule:
+Mystic Type-Writer is a writing tool built around a simple rule:
 
 - no traditional editing
 - text disappears while writing
@@ -30,6 +30,7 @@ The current project includes:
 
 ## Future ideas
 - Add page disappearance mode
+- Add timeout for inactivity
 
 ## Tech stack
 

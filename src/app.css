@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0b0e14;
-  --color-offwhite: #f5f5f5;
-  --color-highlight-dark: #1f2937;
-  --color-highlight-light: #9ca3af;
+	--color-background: #0b0e14;
+	--color-screen: #050a0f;
+	--color-offwhite: #f5f5f5;
+	--color-highlight-dark: #1f2937;
+	--color-highlight-light: #9ca3af;
+
+	--animate-fall: fall 10s linear infinite;
+	--animate-scroll: scroll 20s linear infinite;
+
+	@keyframes fall {
+		from {
+			background-position: 0 0;
+		}
+		to {
+			background-position: 0 600px;
+		}
+	}
+
+	@keyframes scroll {
+		0% {
+			transform: translateY(0);
+		}
+		100% {
+			transform: translateY(100%);
+		}
+	}
 }
 
 * {
-  @apply box-border font-mono;
+	@apply box-border font-mono;
 }
 
 html,
 body {
-  @apply min-h-screen w-screen;
-}
-
-body {
-  @apply bg-background text-offwhite flex justify-center items-center flex-col p-4 gap-4;
+	@apply min-h-screen w-screen;
 }
