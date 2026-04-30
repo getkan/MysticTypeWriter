@@ -88,7 +88,7 @@
 
 	{#if isShareSupported}
 		<button
-			class="border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold"
+			class="border-offwhiteflex bg-background flex w-fit cursor-pointer items-center gap-2 rounded-lg border-2 p-2 font-bold"
 			onclick={() =>
 				navigator.share({
 					title: "My Mystic Type-Writer Story",

@@ -40,7 +40,7 @@
 		<Typewriter />
 		<span class="whitespace-nowrap">Mystic Type-Writer</span>
 	</h1>
-	<p class="max-w-175">
+	<p class="max-w-200">
 		With this mystic typewriter no editing is allowed. As you write, the {configState.disappearanceMode}s
 		you write will disappear slowly. You will only see the full story once it's
 		complete.
