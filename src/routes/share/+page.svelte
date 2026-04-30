@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { base } from "$app/paths";
 	import { getTypewriterInput } from "../state.svelte";
 	import Typewriter from "$lib/Typewriter.svelte";
 	import Download from "./Download.svelte";
@@ -73,7 +74,7 @@
 </button>
 <div class="z-2 flex w-[90vw] max-w-250 justify-between">
 	<a
-		href="/"
+		href={`${base}/`}
 		class="border-offwhiteflex bg-background flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 font-bold"
 		><span class="text-[2rem] leading-4">←</span>Start New Session</a
 	>

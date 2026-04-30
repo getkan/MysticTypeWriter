@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Typewriter from "$lib/Typewriter.svelte";
+	import { base } from "$app/paths";
 	import { onMount } from "svelte";
 	import {
 		STORAGE_KEY,
@@ -74,7 +75,10 @@
 							timeoutEnabled: (e.currentTarget as HTMLInputElement).checked,
 						})}
 				/>
-				<span>Timeout - If you don't type for 30 seconds, the typewriter will automatically end the session.</span>
+				<span
+					>Timeout - If you don't type for 30 seconds, the typewriter will
+					automatically end the session.</span
+				>
 			</label>
 
 			<!-- <label class="flex items-center gap-2">
@@ -119,7 +123,7 @@
 			</label>
 
 			<a
-				href="/typewriter"
+				href={`${base}/typewriter`}
 				class="ml-auto flex w-fit items-baseline gap-2 rounded-lg p-2"
 				>Start Writing<span class="text-[2rem] leading-4">→</span></a
 			>

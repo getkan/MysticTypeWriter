@@ -11,6 +11,7 @@
 		type TypewriterConfig,
 		DISAPPEARANCE_CONFIG,
 	} from "$lib/TypewriterConfig";
+	import { base } from "$app/paths";
 	import { playTypewriterSound } from "./audio.svelte";
 	import { goto } from "$app/navigation";
 	import SoundOn from "./SoundOn.svelte";
@@ -51,7 +52,7 @@
 			focusTypewriter();
 		} catch {
 			localStorage.removeItem(STORAGE_KEY);
-			goto("/");
+			goto(`${base}/`);
 		}
 	});
 
@@ -67,7 +68,7 @@
 		timer = setInterval(() => {
 			timeRemaining = Math.max(0, 30000 - (Date.now() - timeoutStart));
 			if (timeRemaining <= 0) {
-				goto("/share");
+				goto(`${base}/share`);
 			}
 		}, 500);
 	};
@@ -231,7 +232,7 @@
 	</h1>
 
 	<a
-		href="/"
+		href={`${base}/`}
 		class="absolute -top-12 left-0 flex w-fit items-baseline gap-2 rounded-lg p-2"
 		><span class="text-[2rem] leading-4">←</span>Back</a
 	>
@@ -275,7 +276,7 @@
 		{/if}
 	</button>
 	<a
-		href="/share"
+		href={`${base}/share`}
 		class="border-offwhite absolute right-1 -bottom-17 flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 text-3xl font-bold"
 		>Done!</a
 	>
