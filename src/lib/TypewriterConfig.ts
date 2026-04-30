@@ -1,4 +1,4 @@
-export const STORAGE_KEY = "forwardtothevoid:typewriter-config";
+export const STORAGE_KEY = "mystictypewriter:typewriter-config";
 
 export const DISAPPEARANCE_MODES = ["line", "sentence", "word"] as const;
 export type DisappearanceMode = (typeof DISAPPEARANCE_MODES)[number];
