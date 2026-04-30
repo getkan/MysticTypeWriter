@@ -1,0 +1,288 @@
+<script lang="ts">
+	import {
+		config,
+		updateConfig,
+		getTypewriterInput,
+		setTypewriterInput,
+	} from "../state.svelte";
+	import { onMount } from "svelte";
+	import {
+		STORAGE_KEY,
+		type TypewriterConfig,
+		DISAPPEARANCE_CONFIG,
+	} from "$lib/TypewriterConfig";
+	import { playTypewriterSound } from "./audio.svelte";
+	import { goto } from "$app/navigation";
+	import SoundOn from "./SoundOn.svelte";
+	import SoundOff from "./SoundOff.svelte";
+	import Typewriter from "$lib/Typewriter.svelte";
+
+	type ParsedChunk = {
+		text: string;
+		opacity: number;
+	};
+
+	let configState = $derived.by(() => config());
+	let typewriterInput = $derived.by(() => getTypewriterInput());
+	const soundEnabled = $derived.by(() => config().soundEffectsEnabled);
+	const onSoundToggle = () => {
+		updateConfig({ soundEffectsEnabled: !soundEnabled });
+		focusTypewriter();
+	};
+
+	let inputRef: HTMLSpanElement | null = null;
+	let lineRef: HTMLDivElement | null = null;
+
+	onMount(() => {
+		try {
+			setTypewriterInput("");
+
+			const stored = localStorage.getItem(STORAGE_KEY);
+
+			if (stored) {
+				const parsed = JSON.parse(stored) as Partial<TypewriterConfig>;
+				updateConfig(parsed);
+			}
+
+			if (configState.timeoutEnabled) {
+				initiateTimeout();
+			}
+
+			focusTypewriter();
+		} catch {
+			localStorage.removeItem(STORAGE_KEY);
+			goto("/");
+		}
+	});
+
+	let timer = -1;
+	let timeoutStart = $state(Date.now());
+	let timeRemaining = $state(30000);
+	const initiateTimeout = () => {
+		if (timer !== -1) {
+			clearInterval(timer);
+			timeoutStart = Date.now();
+			timeRemaining = 30000;
+		}
+		timer = setInterval(() => {
+			timeRemaining = Math.max(0, 30000 - (Date.now() - timeoutStart));
+			if (timeRemaining <= 0) {
+				goto("/share");
+			}
+		}, 500);
+	};
+
+	const onkeydownTypewriter = (e: KeyboardEvent) => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			const sel = window.getSelection();
+			if (sel && sel.rangeCount > 0) {
+				const range = sel.getRangeAt(0);
+				range.deleteContents();
+
+				const newline = document.createTextNode("\n");
+				range.insertNode(newline);
+				range.setStartAfter(newline);
+				range.collapse(true);
+				sel.removeAllRanges();
+				sel.addRange(range);
+			}
+
+			setTypewriterInput(inputRef?.innerText ?? "");
+			return;
+		}
+
+		if (e.key === "Backspace" || e.key === "Delete") {
+			e.preventDefault();
+		}
+		if (
+			configState.timeoutEnabled &&
+			!["Shift", "Control", "Alt", "Meta", "Backspace", "Delete"].includes(
+				e.key,
+			)
+		) {
+			initiateTimeout();
+		}
+		focusTypewriter();
+	};
+
+	const onkeyupTypewriter = () => {
+		if (configState.soundEffectsEnabled) {
+			playTypewriterSound();
+		}
+	};
+
+	const inputTypewriter = (
+		e: Event & { currentTarget: EventTarget & HTMLSpanElement },
+	) => {
+		const target = e.currentTarget;
+		setTypewriterInput(
+			target.innerText
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;"),
+		);
+
+		if (lineRef) {
+			lineRef.innerHTML = typewriterInput.replace(/\S+\s*/g, "<n>$&</n>");
+		}
+	};
+
+	const focusTypewriter = () => {
+		inputRef?.focus();
+		const sel = window.getSelection();
+		if (inputRef && sel) {
+			const range = document.createRange();
+			range.selectNodeContents(inputRef);
+			range.collapse(false);
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+	};
+
+	const parseInput = (input: string): ParsedChunk[] => {
+		if (!configState.disappearanceMode) {
+			return [{ text: input, opacity: 100 }];
+		}
+
+		const { disappearanceMode } = configState;
+		const regexes: Record<string, RegExp> = {
+			sentence: /[^.!?]*[.!?]*/g,
+			word: /\S+\s*/g,
+		};
+		const { show, fade } = DISAPPEARANCE_CONFIG[disappearanceMode];
+		let matchArray = [];
+		if (disappearanceMode === "line") {
+			if (!lineRef) {
+				return [{ text: input, opacity: 100 }];
+			}
+
+			let spans = lineRef.children;
+			let top = 0;
+			let lineArr = [""];
+
+			// 1. Split text into individual spans for each word
+			lineRef.innerHTML = lineRef.textContent.replace(/\S+\s*/g, "<n>$&</n>");
+
+			// 2. Loop through words and check if 'top' changes
+			for (let i = 0; i < spans.length; i++) {
+				var rect = spans[i].getBoundingClientRect();
+				if (rect.top > top) {
+					if (top > 0) {
+						lineArr.push("");
+					}
+					top = rect.top;
+				}
+				lineArr[lineArr.length - 1] += spans[i].textContent;
+			}
+			matchArray = lineArr;
+		} else {
+			const regex = regexes[disappearanceMode] || regexes["word"];
+			matchArray = input.match(regex)?.filter(Boolean) || [];
+		}
+
+		const matchArrayLn = matchArray.length;
+		const hideUntil = matchArrayLn - (show + fade);
+		const fadeUntil = matchArrayLn - show;
+		let fadeCount = 0;
+
+		return matchArray.flatMap((item, index) => {
+			if (hideUntil && index < hideUntil) {
+				return { text: item, opacity: 0 };
+			}
+
+			if (fadeUntil && index < fadeUntil) {
+				if (fade > 1) {
+					fadeCount += 1;
+					const opacity = Math.max(
+						0,
+						Math.min(100, Math.round((100 / fade) * fadeCount)),
+					);
+					return { text: item, opacity };
+				}
+				return { text: item, opacity: 50 };
+			}
+
+			return { text: item, opacity: 100 };
+		});
+	};
+
+	const parsedChunks = $derived.by(() => parseInput(typewriterInput));
+</script>
+
+<div
+	class="border-offwhite bg-background relative flex h-[75vh] max-h-100 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-4 sm:p-8"
+	onclick={() => inputRef?.focus()}
+	onkeydown={() => {}}
+	role="button"
+	tabindex="0"
+	aria-label="Typewriter input area, click to focus"
+>
+	<h1
+		class="bg-background absolute -top-6 right-8 z-2 px-2 text-[2rem] font-bold"
+	>
+		{#if configState.timeoutEnabled && timeRemaining <= 10000}
+			<span class="text-3xl">{Math.ceil(timeRemaining / 1000)}</span>
+		{:else}
+			<Typewriter />
+		{/if}
+	</h1>
+
+	<a
+		href="/"
+		class="absolute -top-12 left-0 flex w-fit items-baseline gap-2 rounded-lg p-2"
+		><span class="text-[2rem] leading-4">←</span>Back</a
+	>
+
+	<div
+		class="after:bg-background absolute inset-0 overflow-hidden after:absolute after:top-0 after:right-0 after:left-0 after:h-8 after:rounded-t-lg after:opacity-50 after:content-['']"
+	>
+		<div
+			contenteditable="true"
+			role="textbox"
+			tabindex="0"
+			class="absolute right-8 bottom-1/4 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent outline-none sm:bottom-1/4 md:bottom-1/3"
+			spellcheck="false"
+			bind:this={inputRef}
+			onkeydown={onkeydownTypewriter}
+			onkeyup={onkeyupTypewriter}
+			oninput={inputTypewriter}
+			onpaste={(e) => e.preventDefault()}
+		></div>
+
+		<div
+			class="pointer-events-none absolute right-8 bottom-4 left-8 block text-left wrap-break-word whitespace-pre-wrap after:ml-px after:inline-block after:h-[1.1em] after:w-1 after:bg-current after:align-middle after:content-[''] sm:bottom-1/4 md:bottom-1/3"
+		>
+			{#each parsedChunks as chunk}
+				{@render Chunk(chunk.text, chunk.opacity)}
+			{/each}
+		</div>
+		<div
+			bind:this={lineRef}
+			class="pointer-events-none invisible absolute right-8 bottom-4 left-8 text-left wrap-break-word whitespace-pre-wrap sm:bottom-1/4 md:bottom-1/3"
+		></div>
+	</div>
+	<button
+		onclick={onSoundToggle}
+		class="absolute -bottom-12 left-4 cursor-pointer"
+	>
+		{#if soundEnabled}
+			<SoundOn class="h-8 w-8" />
+		{:else}
+			<SoundOff class="h-8 w-8" />
+		{/if}
+	</button>
+	<a
+		href="/share"
+		class="border-offwhite absolute right-1 -bottom-17 flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 text-3xl font-bold"
+		>Done!</a
+	>
+</div>
+
+{#snippet Chunk(text: string, opacity: number)}
+	<span style="opacity:{opacity}%">{text}</span>
+{/snippet}
+
+<span class="hidden">{typewriterInput}</span>
