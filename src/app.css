@@ -7,7 +7,6 @@
 	--color-highlight-dark: #1f2937;
 	--color-highlight-light: #9ca3af;
 
-	--animate-fall: fall 10s linear infinite;
 	--animate-scroll: scroll 20s linear infinite;
 	--animate-blink: blink 1.5s step-start infinite;
 
@@ -48,4 +47,8 @@
 html,
 body {
 	@apply min-h-screen w-screen;
+}
+
+.fall-lines {
+	animation: fall var(--tw-duration, 10s) linear infinite;
 }

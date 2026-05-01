@@ -5,6 +5,7 @@
 	import { STORAGE_KEY } from "$lib/model/constants";
 	import { DISAPPEARANCE_MODES, type TypewriterConfig } from "$lib/model/types";
 	import { getConfig, updateConfig } from "$lib/state/config.svelte";
+	import { playTypewriterSound } from "$lib/features/typewriter/audio/audio.svelte";
 
 	onMount(() => {
 		try {
@@ -13,6 +14,14 @@
 			if (stored) {
 				const parsed = JSON.parse(stored) as Partial<TypewriterConfig>;
 				updateConfig(parsed);
+			} else {
+				updateConfig({
+					disappearanceMode: "line",
+					timeoutEnabled: true,
+					animationsEnabled: true,
+					soundEffectsEnabled: false,
+				});
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(getConfig()));
 			}
 		} catch {
 			localStorage.removeItem(STORAGE_KEY);
@@ -88,11 +97,15 @@
 				<input
 					type="checkbox"
 					bind:checked={configState.soundEffectsEnabled}
-					onchange={(e) =>
+					onchange={(e) => {
 						updateConfig({
 							soundEffectsEnabled: (e.currentTarget as HTMLInputElement)
 								.checked,
-						})}
+						});
+						if ((e.currentTarget as HTMLInputElement).checked) {
+							playTypewriterSound();
+						}
+					}}
 				/>
 				<span>Sound effects enabled</span>
 			</label>

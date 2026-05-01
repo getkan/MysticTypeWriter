@@ -12,8 +12,8 @@ export class TypewriterConfigInput {
 		this.disappearanceMode = input.disappearanceMode ?? "line";
 		this.strictEditing = input.strictEditing ?? false;
 		this.timeoutEnabled = input.timeoutEnabled ?? true;
-		this.animationsEnabled = input.animationsEnabled ?? true;
-		this.soundEffectsEnabled = input.soundEffectsEnabled ?? true;
+		this.animationsEnabled = input.animationsEnabled ?? false;
+		this.soundEffectsEnabled = input.soundEffectsEnabled ?? false;
 		this.validate();
 	}
 
