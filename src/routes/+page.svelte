@@ -1,13 +1,10 @@
 <script lang="ts">
-	import Typewriter from "$lib/Typewriter.svelte";
+	import Typewriter from "$lib/components/icons/Typewriter.svelte";
 	import { resolve } from "$app/paths";
 	import { onMount } from "svelte";
-	import {
-		STORAGE_KEY,
-		DISAPPEARANCE_MODES,
-		type TypewriterConfig,
-	} from "$lib/TypewriterConfig";
-	import { config, updateConfig } from "./state.svelte";
+	import { STORAGE_KEY } from "$lib/model/constants";
+	import { DISAPPEARANCE_MODES, type TypewriterConfig } from "$lib/model/types";
+	import { getConfig, updateConfig } from "$lib/state/config.svelte";
 
 	onMount(() => {
 		try {
@@ -22,7 +19,7 @@
 		}
 	});
 
-	let configState = $state(config());
+	let configState = $state(getConfig());
 </script>
 
 <div

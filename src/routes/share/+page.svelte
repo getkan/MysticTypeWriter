@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { resolve } from "$app/paths";
-	import { getTypewriterInput } from "../state.svelte";
-	import Typewriter from "$lib/Typewriter.svelte";
-	import Download from "./Download.svelte";
+	import { getTypewriterInput } from "$lib/state/typewriter.svelte";
+	import Typewriter from "$lib/components/icons/Typewriter.svelte";
+	import Download from "../../lib/components/icons/Download.svelte";
 	let typewriterInput = $derived.by(() => getTypewriterInput());
 	let showTooltip = $state(false);
 
@@ -74,12 +74,12 @@
 <div class="z-2 flex w-[90vw] max-w-250 justify-between gap-4">
 	<a
 		href={resolve("/")}
-		class="border-offwhiteflex bg-background flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 font-bold"
+		class="hover:bg-highlight-dark focus:bg-highlight-dark border-offwhiteflex bg-background flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 font-bold"
 		><span class="text-[2rem] leading-4">←</span>Start New Session</a
 	>
 	<div class="flex gap-2">
 		<button
-			class="border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold"
+			class="hover:bg-highlight-dark focus:bg-highlight-dark border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold"
 			onclick={downloadStory}
 		>
 			<Download class="fill-offwhite h-6 w-6" />
@@ -88,14 +88,13 @@
 
 		{#if isShareSupported}
 			<button
-				class="border-offwhiteflex bg-background flex w-fit cursor-pointer items-center gap-2 rounded-lg border-2 p-2 font-bold"
+				class="border-offwhiteflex bg-background hover:bg-highlight-dark focus:bg-highlight-dark flex w-fit cursor-pointer items-center gap-2 rounded-lg border-2 p-2 font-bold"
 				onclick={() =>
 					navigator.share({
-						title: "My Mystic Type-Writer Story",
+						title: "Mystic Type-Writer",
 						text: typewriterInput,
 					})}
 			>
-				<Download class="fill-offwhite h-6 w-6" />
 				Share
 			</button>
 		{/if}

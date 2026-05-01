@@ -1,35 +1,5 @@
-export const STORAGE_KEY = "mystictypewriter:typewriter-config";
-
-export const DISAPPEARANCE_MODES = ["line", "sentence", "word"] as const;
-export type DisappearanceMode = (typeof DISAPPEARANCE_MODES)[number];
-
-type DisappearanceConfigEntry = {
-	show: number;
-	fade: number;
-};
-
-export const DISAPPEARANCE_CONFIG = {
-	line: {
-		show: 3,
-		fade: 2,
-	},
-	sentence: {
-		show: 4,
-		fade: 2,
-	},
-	word: {
-		show: 20,
-		fade: 10,
-	},
-} satisfies Record<DisappearanceMode, DisappearanceConfigEntry>;
-
-export type TypewriterConfig = {
-	disappearanceMode: DisappearanceMode;
-	strictEditing: boolean;
-	timeoutEnabled: boolean;
-	animationsEnabled: boolean;
-	soundEffectsEnabled: boolean;
-};
+import { DISAPPEARANCE_MODES } from "./types";
+import type { DisappearanceMode, TypewriterConfig } from "./types";
 
 export class TypewriterConfigInput {
 	disappearanceMode: DisappearanceMode;
@@ -39,12 +9,11 @@ export class TypewriterConfigInput {
 	soundEffectsEnabled: boolean;
 
 	constructor(input: Partial<TypewriterConfig> = {}) {
-		this.disappearanceMode = input.disappearanceMode ?? "sentence";
-		this.strictEditing = input.strictEditing ?? true;
+		this.disappearanceMode = input.disappearanceMode ?? "line";
+		this.strictEditing = input.strictEditing ?? false;
 		this.timeoutEnabled = input.timeoutEnabled ?? true;
 		this.animationsEnabled = input.animationsEnabled ?? true;
-		this.soundEffectsEnabled = input.soundEffectsEnabled ?? false;
-
+		this.soundEffectsEnabled = input.soundEffectsEnabled ?? true;
 		this.validate();
 	}
 
@@ -52,7 +21,6 @@ export class TypewriterConfigInput {
 		if (!DISAPPEARANCE_MODES.includes(this.disappearanceMode)) {
 			throw new Error(`Invalid disappearance mode: ${this.disappearanceMode}`);
 		}
-
 		return true;
 	}
 
@@ -71,9 +39,5 @@ export class TypewriterConfigInput {
 			animationsEnabled: this.animationsEnabled,
 			soundEffectsEnabled: this.soundEffectsEnabled,
 		};
-	}
-
-	toJson(): string {
-		return JSON.stringify(this.toTypewriterConfig());
 	}
 }
