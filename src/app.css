@@ -9,6 +9,18 @@
 
 	--animate-fall: fall 10s linear infinite;
 	--animate-scroll: scroll 20s linear infinite;
+	--animate-blink: blink 1.5s step-start infinite;
+
+	@keyframes blink {
+		0%,
+		75%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0;
+		}
+	}
 
 	@keyframes fall {
 		from {

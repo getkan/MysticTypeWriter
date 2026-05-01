@@ -12,7 +12,7 @@
 		DISAPPEARANCE_CONFIG,
 	} from "$lib/TypewriterConfig";
 	import { resolve } from "$app/paths";
-	import { playTypewriterSound } from "./audio.svelte";
+	import { playTypewriterSound, playReturnSound } from "./audio.svelte";
 	import { goto } from "$app/navigation";
 	import SoundOn from "./SoundOn.svelte";
 	import SoundOff from "./SoundOff.svelte";
@@ -25,14 +25,21 @@
 
 	let configState = $derived.by(() => config());
 	let typewriterInput = $derived.by(() => getTypewriterInput());
-	const soundEnabled = $derived.by(() => config().soundEffectsEnabled);
-	const onSoundToggle = () => {
-		updateConfig({ soundEffectsEnabled: !soundEnabled });
-		focusTypewriter();
-	};
 
 	let inputRef: HTMLSpanElement | null = null;
 	let lineRef: HTMLDivElement | null = null;
+
+	const focusTypewriter = () => {
+		inputRef?.focus();
+		const sel = window.getSelection();
+		if (inputRef && sel) {
+			const range = document.createRange();
+			range.selectNodeContents(inputRef);
+			range.collapse(false);
+			sel.removeAllRanges();
+			sel.addRange(range);
+		}
+	};
 
 	onMount(() => {
 		try {
@@ -55,6 +62,12 @@
 			goto(resolve("/"));
 		}
 	});
+
+	const soundEnabled = $derived.by(() => config().soundEffectsEnabled);
+	const onSoundToggle = () => {
+		updateConfig({ soundEffectsEnabled: !soundEnabled });
+		focusTypewriter();
+	};
 
 	let timer = -1;
 	let timeoutStart = $state(Date.now());
@@ -122,34 +135,17 @@
 	const inputTypewriter = (
 		e: Event & { currentTarget: EventTarget & HTMLSpanElement },
 	) => {
-		const target = e.currentTarget;
-		setTypewriterInput(
-			target.innerText
-				.replace(/&/g, "&amp;")
-				.replace(/</g, "&lt;")
-				.replace(/>/g, "&gt;")
-				.replace(/"/g, "&quot;")
-				.replace(/'/g, "&#039;"),
-		);
-
-		if (lineRef) {
-			lineRef.innerHTML = typewriterInput.replace(/\S+\s*/g, "<n>$&</n>");
-		}
+		const cleaned = e.currentTarget.innerText
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#039;");
+		setTypewriterInput(cleaned);
 	};
 
-	const focusTypewriter = () => {
-		inputRef?.focus();
-		const sel = window.getSelection();
-		if (inputRef && sel) {
-			const range = document.createRange();
-			range.selectNodeContents(inputRef);
-			range.collapse(false);
-			sel.removeAllRanges();
-			sel.addRange(range);
-		}
-	};
-
-	const parseInput = (input: string): ParsedChunk[] => {
+	const parsedChunks = $derived.by((): ParsedChunk[] => {
+		let input = typewriterInput;
 		if (!configState.disappearanceMode) {
 			return [{ text: input, opacity: 100 }];
 		}
@@ -166,25 +162,29 @@
 				return [{ text: input, opacity: 100 }];
 			}
 
-			let spans = lineRef.children;
-			let top = 0;
-			let lineArr = [""];
+			// Build measurement spans from the current input value.
+			lineRef.innerHTML = input.replace(
+				/\S+\s*/g,
+				(match) => `<span>${match}</span>`,
+			);
 
-			// 1. Split text into individual spans for each word
-			lineRef.innerHTML = lineRef.textContent.replace(/\S+\s*/g, "<n>$&</n>");
+			let spans = Array.from(lineRef.querySelectorAll("span"));
 
-			// 2. Loop through words and check if 'top' changes
-			for (let i = 0; i < spans.length; i++) {
-				var rect = spans[i].getBoundingClientRect();
-				if (rect.top > top) {
-					if (top > 0) {
-						lineArr.push("");
-					}
-					top = rect.top;
-				}
-				lineArr[lineArr.length - 1] += spans[i].textContent;
+			if (spans.length === 0) {
+				return [{ text: input, opacity: 100 }];
 			}
-			matchArray = lineArr;
+
+			// Loop through words and start a new chunk when the rendered line changes.
+			let top: number | null = null;
+			for (let i = 0; i < spans.length; i++) {
+				const rect = spans[i].getBoundingClientRect();
+				const roundedTop = Math.round(rect.top);
+				if (top === null || roundedTop > top) {
+					matchArray.push("");
+					top = roundedTop;
+				}
+				matchArray[matchArray.length - 1] += spans[i].textContent;
+			}
 		} else {
 			const regex = regexes[disappearanceMode] || regexes["word"];
 			matchArray = input.match(regex)?.filter(Boolean) || [];
@@ -205,7 +205,7 @@
 					fadeCount += 1;
 					const opacity = Math.max(
 						0,
-						Math.min(100, Math.round((100 / fade) * fadeCount)),
+						Math.min(100, Math.round((100 / (fade + 1)) * fadeCount)),
 					);
 					return { text: item, opacity };
 				}
@@ -214,13 +214,11 @@
 
 			return { text: item, opacity: 100 };
 		});
-	};
-
-	const parsedChunks = $derived.by(() => parseInput(typewriterInput));
+	});
 </script>
 
 <div
-	class="border-offwhite bg-background relative flex h-[75vh] max-h-100 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-4 sm:p-8"
+	class="border-offwhite bg-background relative flex h-72 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-4 sm:h-96 sm:p-8 md:h-120 lg:h-144"
 	onclick={() => inputRef?.focus()}
 	onkeydown={() => {}}
 	role="button"
@@ -260,11 +258,13 @@
 		></div>
 
 		<div
-			class="pointer-events-none absolute right-8 bottom-4 left-8 block text-left wrap-break-word whitespace-pre-wrap after:ml-px after:inline-block after:h-[1.1em] after:w-1 after:bg-current after:align-middle after:content-[''] sm:bottom-1/4 md:bottom-1/3"
+			class="pointer-events-none absolute right-8 bottom-4 left-8 block text-left wrap-break-word whitespace-pre-wrap sm:bottom-1/4 md:bottom-1/3"
 		>
 			{#each parsedChunks as chunk}
 				{@render Chunk(chunk.text, chunk.opacity)}
-			{/each}
+			{/each}<span
+				class="animate-blink ml-1 inline-block h-[1.1em] w-1 bg-current align-middle"
+			></span>
 		</div>
 		<div
 			bind:this={lineRef}
