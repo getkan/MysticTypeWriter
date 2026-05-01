@@ -23,10 +23,16 @@ const typewriterSounds = [
 	typewriter10,
 ];
 
-export const playReturnSound = () => {
-	const audio = new Audio(typewriterReturn);
-	audio.play();
-};
+export const playReturnSound = (() => {
+	let lastTime = 0;
+	return () => {
+		const now = Date.now();
+		if (now - lastTime >= 1000) {
+			lastTime = now;
+			new Audio(typewriterReturn).play();
+		}
+	};
+})();
 
 export const playTypewriterSound = (() => {
 	let lastTime = 0;
@@ -35,8 +41,7 @@ export const playTypewriterSound = (() => {
 		if (now - lastTime >= 100) {
 			lastTime = now;
 			const randomIndex = Math.floor(Math.random() * typewriterSounds.length);
-			const audioElement = new Audio(typewriterSounds[randomIndex]);
-			audioElement.play();
+			new Audio(typewriterSounds[randomIndex]).play();
 		}
 	};
 })();

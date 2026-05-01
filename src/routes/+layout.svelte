@@ -2,9 +2,9 @@
 	import favicon from "$lib/assets/favicon.svg";
 	import "../app.css";
 
-	import { config } from "./state.svelte";
+	import { getConfig } from "$lib/state/config.svelte";
 
-	const animationEnabled = $derived.by(() => config().animationsEnabled);
+	const animationEnabled = $derived.by(() => getConfig().animationsEnabled);
 
 	let { children } = $props();
 </script>

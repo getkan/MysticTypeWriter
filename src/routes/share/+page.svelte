@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { resolve } from "$app/paths";
-	import { getTypewriterInput } from "../state.svelte";
-	import Typewriter from "$lib/Typewriter.svelte";
-	import Download from "./Download.svelte";
+	import { getTypewriterInput } from "$lib/state/typewriter.svelte";
+	import Typewriter from "$lib/components/icons/Typewriter.svelte";
+	import Download from "../../lib/components/icons/Download.svelte";
 	let typewriterInput = $derived.by(() => getTypewriterInput());
 	let showTooltip = $state(false);
 
@@ -47,9 +47,10 @@
 		<span class="whitespace-nowrap">Mystic Type-Writer</span>
 	</h1>
 
-	Nothing is saved or stored, once you leave this page the story will disappear.
-	COPY the story by clicking the box below so you can share or copy it to
-	another location. You can also download the story as a text file
+	Nothing is saved, once you leave this page the story will disappear. Copy it
+	by clicking the box below and paste it somewhere else, or use the button{isShareSupported
+		? "s to share it directly or"
+		: ""} to download it as a text file. Or let it disappear.
 </div>
 <button
 	onclick={copyToClipboard}
@@ -74,12 +75,12 @@
 <div class="z-2 flex w-[90vw] max-w-250 justify-between gap-4">
 	<a
 		href={resolve("/")}
-		class="border-offwhiteflex bg-background flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 font-bold"
+		class="hover:bg-highlight-dark focus:bg-highlight-dark border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold sm:items-baseline"
 		><span class="text-[2rem] leading-4">←</span>Start New Session</a
 	>
-	<div class="flex gap-2">
+	<div class="flex justify-between gap-2">
 		<button
-			class="border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold"
+			class="hover:bg-highlight-dark focus:bg-highlight-dark border-offwhiteflex bg-background flex w-fit items-center gap-2 rounded-lg border-2 p-2 font-bold"
 			onclick={downloadStory}
 		>
 			<Download class="fill-offwhite h-6 w-6" />
@@ -88,14 +89,13 @@
 
 		{#if isShareSupported}
 			<button
-				class="border-offwhiteflex bg-background flex w-fit cursor-pointer items-center gap-2 rounded-lg border-2 p-2 font-bold"
+				class="border-offwhiteflex bg-background hover:bg-highlight-dark focus:bg-highlight-dark flex w-fit cursor-pointer items-center gap-2 rounded-lg border-2 p-2 font-bold"
 				onclick={() =>
 					navigator.share({
-						title: "My Mystic Type-Writer Story",
+						title: "Mystic Type-Writer",
 						text: typewriterInput,
 					})}
 			>
-				<Download class="fill-offwhite h-6 w-6" />
 				Share
 			</button>
 		{/if}
