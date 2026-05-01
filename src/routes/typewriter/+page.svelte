@@ -5,13 +5,13 @@
 		getTypewriterInput,
 		setTypewriterInput,
 	} from "../state.svelte";
-	import { onMount } from "svelte";
+	import { onDestroy, onMount } from "svelte";
 	import {
 		STORAGE_KEY,
 		type TypewriterConfig,
 		DISAPPEARANCE_CONFIG,
 	} from "$lib/TypewriterConfig";
-	import { base } from "$app/paths";
+	import { resolve } from "$app/paths";
 	import { playTypewriterSound } from "./audio.svelte";
 	import { goto } from "$app/navigation";
 	import SoundOn from "./SoundOn.svelte";
@@ -52,7 +52,7 @@
 			focusTypewriter();
 		} catch {
 			localStorage.removeItem(STORAGE_KEY);
-			goto(`${base}/`);
+			goto(resolve("/"));
 		}
 	});
 
@@ -68,10 +68,16 @@
 		timer = setInterval(() => {
 			timeRemaining = Math.max(0, 30000 - (Date.now() - timeoutStart));
 			if (timeRemaining <= 0) {
-				goto(`${base}/share`);
+				goto(resolve("/share"));
 			}
 		}, 500);
 	};
+
+	onDestroy(() => {
+		if (timer !== -1) {
+			clearInterval(timer);
+		}
+	});
 
 	const onkeydownTypewriter = (e: KeyboardEvent) => {
 		if (e.key === "Enter") {
@@ -232,7 +238,7 @@
 	</h1>
 
 	<a
-		href={`${base}/`}
+		href={resolve("/")}
 		class="absolute -top-12 left-0 flex w-fit items-baseline gap-2 rounded-lg p-2"
 		><span class="text-[2rem] leading-4">←</span>Back</a
 	>
@@ -276,7 +282,7 @@
 		{/if}
 	</button>
 	<a
-		href={`${base}/share`}
+		href={resolve("/share")}
 		class="border-offwhite absolute right-1 -bottom-17 flex w-fit items-baseline gap-2 rounded-lg border-2 p-2 text-3xl font-bold"
 		>Done!</a
 	>
