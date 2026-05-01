@@ -27,7 +27,7 @@ export const playReturnSound = (() => {
 	let lastTime = 0;
 	return () => {
 		const now = Date.now();
-		if (now - lastTime >= 200) {
+		if (now - lastTime >= 1000) {
 			lastTime = now;
 			new Audio(typewriterReturn).play();
 		}

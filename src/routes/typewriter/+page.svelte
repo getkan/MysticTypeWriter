@@ -99,13 +99,11 @@
 		) {
 			initiateTimeout();
 		}
-		focusEditor(inputRef);
-	};
 
-	const onkeyupTypewriter = () => {
 		if (configState.soundEffectsEnabled) {
 			playTypewriterSound();
 		}
+		focusEditor(inputRef);
 	};
 
 	const inputTypewriter = (
@@ -121,7 +119,7 @@
 </script>
 
 <div
-	class="border-offwhite bg-background relative flex h-72 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-4 sm:h-96 sm:p-8 md:h-120 lg:h-144"
+	class="border-offwhite bg-background sm: relative flex h-109 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-8 sm:h-80"
 	onclick={() => inputRef?.focus()}
 	onkeydown={() => {}}
 	role="button"
@@ -144,27 +142,33 @@
 		><span class="text-[2rem] leading-4">←</span>Back</a
 	>
 
-	<div
-		class="after:bg-background absolute inset-0 overflow-hidden after:absolute after:top-0 after:right-0 after:left-0 after:h-8 after:rounded-t-lg after:opacity-50 after:content-['']"
-	>
+	<div class="absolute inset-0 overflow-hidden">
+		<span
+			class="bg-background absolute top-0 right-0 left-0 z-4 h-4.5 rounded-t-lg"
+		></span>
+		<span
+			class="bg-background absolute top-0 right-0 left-0 z-4 h-10 rounded-t-lg opacity-66"
+		></span>
+		<span
+			class="bg-background absolute top-0 right-0 left-0 z-4 h-16.5 rounded-t-lg opacity-33"
+		></span>
 		<div
 			contenteditable="true"
 			role="textbox"
 			tabindex="0"
-			class="absolute right-8 bottom-1/4 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent outline-none sm:bottom-1/4 md:bottom-1/3"
+			class="absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent outline-none"
 			spellcheck="false"
 			bind:this={inputRef}
 			onkeydown={onkeydownTypewriter}
-			onkeyup={onkeyupTypewriter}
 			oninput={inputTypewriter}
 			onpaste={(e) => e.preventDefault()}
 		></div>
 
 		<div
-			class="pointer-events-none absolute right-8 bottom-4 left-8 block text-left wrap-break-word whitespace-pre-wrap sm:bottom-1/4 md:bottom-1/3"
+			class="pointer-events-none absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap"
 		>
 			{#each parsedChunks as chunk}
-				{@render Chunk(chunk.text, chunk.opacity)}
+				{@render Chunk(chunk.text, chunk.opacity, chunk.blur)}
 			{/each}<span
 				bind:this={cursorRef}
 				class="animate-blink ml-1 inline-block h-[1.1em] w-1 bg-current align-middle"
@@ -172,7 +176,7 @@
 		</div>
 		<div
 			bind:this={lineRef}
-			class="pointer-events-none invisible absolute right-8 bottom-4 left-8 text-left wrap-break-word whitespace-pre-wrap sm:bottom-1/4 md:bottom-1/3"
+			class="pointer-events-none invisible absolute right-8 bottom-8 left-8 text-left wrap-break-word whitespace-pre-wrap"
 		></div>
 	</div>
 	<button
@@ -192,6 +196,6 @@
 	>
 </div>
 
-{#snippet Chunk(text: string, opacity: number)}
-	<span style="opacity:{opacity}%">{text}</span>
+{#snippet Chunk(text: string, opacity: number, blur: number = 0)}
+	<span style="opacity:{opacity}%; filter: blur({blur}px);">{text}</span>
 {/snippet}

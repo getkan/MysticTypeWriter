@@ -4,6 +4,7 @@ import type { DisappearanceMode } from "$lib/model/types";
 export type ParsedChunk = {
 	text: string;
 	opacity: number;
+	blur?: number;
 };
 
 export function parseInput(
@@ -58,10 +59,14 @@ export function parseInput(
 					0,
 					Math.min(100, Math.round((100 / (fade + 1)) * fadeCount)),
 				);
-				return { text: item, opacity };
+				return {
+					text: item,
+					opacity,
+					blur: ((fadeUntil - index) * 1) / (fade + 1),
+				};
 			}
-			return { text: item, opacity: 50 };
+			return { text: item, opacity: 50, blur: 0.5 };
 		}
-		return { text: item, opacity: 100 };
+		return { text: item, opacity: 100, blur: 0 };
 	});
 }
