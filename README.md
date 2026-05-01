@@ -20,6 +20,7 @@ The current project includes:
 - a dark terminal-style theme
 
 ## Roadmap
+
 - [x] Create landing/configuration page
 - [x] Implement shared in-app typewriter configuration state
 - [x] Create typewriter basic ui and functionality
@@ -30,15 +31,16 @@ The current project includes:
 - [x] Add timeout for inactivity
 - [x] Work on suggestions in docs
 - [ ] Exquisite Corpse game mode
-	- Config: int players, int rounds, disappearanceMode = 'sentence', show = 1, fade = 1, 
-	- Each player writes for a set time or until they finish a sentence, then passes to the next player
-	- Done button is replaced with an advance button that moves to the next player and resets the timer (if enabled)
-	- At the end of the last round the full text is revealed and can be shared
+  - Config: int players, int rounds, disappearanceMode = 'sentence', show = 1, fade = 1,
+  - Each player writes for a set time or until they finish a sentence, then passes to the next player
+  - Done button is replaced with an advance button that moves to the next player and resets the timer (if enabled)
+  - At the end of the last round the full text is revealed and can be shared
 
 ## Future ideas
+
 - Add page disappearance mode
 - improve mobile experience, the input box should adjust to the keyboard and not be pushed offscreen
-- add a backend to save snippets of text and display them in a gallery, text in the white boxes animated to slowly drift from side to side, maybe with a parallax effect on mouse move or scroll, clicking on a snippet brings it to the front and pauses the animation. 
+- add a backend to save snippets of text and display them in a gallery, text in the white boxes animated to slowly drift from side to side, maybe with a parallax effect on mouse move or scroll, clicking on a snippet brings it to the front and pauses the animation.
 
 ## Tech stack
 
@@ -93,11 +95,30 @@ npm run dev -- --open
 
 ```text
 src/
+  app.css
+  app.html
   lib/
-    TypewriterConfig.ts
+    assets/
+    components/
+      icons/
+    features/
+      typewriter/
+        audio/
+        logic/
+    model/
+      config.ts
+      constants.ts
+      types.ts
+    state/
+      config.svelte.ts
+      typewriter.svelte.ts
   routes/
+    +layout.svelte
     +page.svelte
-    Typewriter.svelte
+    share/
+      +page.svelte
+    typewriter/
+      +page.svelte
     typewriter/
 ```
 
