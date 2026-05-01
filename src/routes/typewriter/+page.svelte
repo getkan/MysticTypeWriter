@@ -44,7 +44,7 @@
 		if (!parent) return;
 		const cursorRect = cursorRef.getBoundingClientRect();
 		const parentRect = parent.getBoundingClientRect();
-		if (cursorRect.right >= parentRect.right - 1) {
+		if (cursorRect.right >= parentRect.right - 8) {
 			playReturnSound();
 		}
 	};
