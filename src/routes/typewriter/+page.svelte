@@ -127,7 +127,7 @@
 	aria-label="Typewriter input area, click to focus"
 >
 	<h1
-		class="bg-background absolute -top-6 right-8 z-2 px-2 text-[2rem] font-bold"
+		class="bg-background absolute -top-6 right-8 z-8 px-2 text-[2rem] font-bold"
 	>
 		{#if configState.timeoutEnabled && timeRemaining <= 10000}
 			<span class="text-3xl">{Math.ceil(timeRemaining / 1000)}</span>
