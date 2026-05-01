@@ -195,5 +195,3 @@
 {#snippet Chunk(text: string, opacity: number)}
 	<span style="opacity:{opacity}%">{text}</span>
 {/snippet}
-
-<span class="hidden">{typewriterInput}</span>
