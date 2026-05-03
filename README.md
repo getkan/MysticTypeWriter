@@ -35,10 +35,11 @@ The current project includes:
   - Each player writes for a set time or until they finish a sentence, then passes to the next player
   - Done button is replaced with an advance button that moves to the next player and resets the timer (if enabled)
   - At the end of the last round the full text is revealed and can be shared
+  - Add protections against reloading or accidental navigation, maybe with local storage
 
 ## Future ideas
 
-- Add page disappearance mode
+- Add page disappearance mode, including page turning animation and sound effects
 - improve mobile experience, the input box should adjust to the keyboard and not be pushed offscreen
 - add a backend to save snippets of text and display them in a gallery, text in the white boxes animated to slowly drift from side to side, maybe with a parallax effect on mouse move or scroll, clicking on a snippet brings it to the front and pauses the animation.
 
@@ -125,6 +126,10 @@ src/
 ## Styling
 
 The UI uses a dark, terminal-like palette defined in `src/app.css`, with Tailwind CSS v4 and theme tokens.
+
+## Additional docs
+
+- Node backend setup guide: `docs/node-backend-setup.md`
 
 ## License
 
