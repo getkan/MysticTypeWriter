@@ -20,10 +20,12 @@ export function parseInput(
 	if (disappearanceMode === "line") {
 		if (!lineRef) return [{ text: input, opacity: 100 }];
 
-		lineRef.innerHTML = input.replace(
-			/\S+\s*/g,
-			(match) => `<span>${match}</span>`,
-		);
+		lineRef.textContent = "";
+		for (const match of input.match(/\S+\s*/g) ?? []) {
+			const span = document.createElement("span");
+			span.textContent = match;
+			lineRef.appendChild(span);
+		}
 		const spans = Array.from(lineRef.querySelectorAll("span"));
 		if (spans.length === 0) return [{ text: input, opacity: 100 }];
 

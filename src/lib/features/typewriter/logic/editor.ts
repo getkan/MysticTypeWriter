@@ -11,16 +11,12 @@ export const focusEditor = (inputRef: HTMLElement | null) => {
 };
 
 export const insertNewline = (inputRef: HTMLElement | null) => {
+	if (!inputRef) return;
 	const sel = window.getSelection();
 	if (!sel || sel.rangeCount === 0) return;
 
-	const range = sel.getRangeAt(0);
-	range.deleteContents();
-
-	const newline = document.createTextNode("\n");
-	range.insertNode(newline);
-	range.setStartAfter(newline);
-	range.collapse(true);
-	sel.removeAllRanges();
-	sel.addRange(range);
+	// Manual Range/text-node insertion leaves the caret unable to land after a
+	// trailing newline, causing subsequent typed characters to merge before it.
+	// execCommand replicates native Enter handling and keeps the caret in sync.
+	document.execCommand("insertLineBreak");
 };
