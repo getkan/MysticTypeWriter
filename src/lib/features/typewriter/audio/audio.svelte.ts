@@ -29,7 +29,7 @@ export const playReturnSound = (() => {
 		const now = Date.now();
 		if (now - lastTime >= 1000) {
 			lastTime = now;
-			new Audio(typewriterReturn).play();
+			new Audio(typewriterReturn).play().catch(() => {});
 		}
 	};
 })();
@@ -41,7 +41,7 @@ export const playTypewriterSound = (() => {
 		if (now - lastTime >= 100) {
 			lastTime = now;
 			const randomIndex = Math.floor(Math.random() * typewriterSounds.length);
-			new Audio(typewriterSounds[randomIndex]).play();
+			new Audio(typewriterSounds[randomIndex]).play().catch(() => {});
 		}
 	};
 })();

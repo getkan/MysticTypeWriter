@@ -69,6 +69,18 @@
 			<label class="flex items-center gap-2">
 				<input
 					type="checkbox"
+					bind:checked={configState.strictEditing}
+					onchange={(e) =>
+						updateConfig({
+							strictEditing: (e.currentTarget as HTMLInputElement).checked,
+						})}
+				/>
+				<span>Strict editing - backspace and delete are disabled.</span>
+			</label>
+
+			<label class="flex items-center gap-2">
+				<input
+					type="checkbox"
 					bind:checked={configState.timeoutEnabled}
 					onchange={(e) =>
 						updateConfig({

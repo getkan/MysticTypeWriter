@@ -88,7 +88,10 @@
 			return;
 		}
 
-		if (e.key === "Backspace" || e.key === "Delete") {
+		if (
+			configState.strictEditing &&
+			(e.key === "Backspace" || e.key === "Delete")
+		) {
 			e.preventDefault();
 		}
 		if (
@@ -119,7 +122,7 @@
 </script>
 
 <div
-	class="border-offwhite bg-background sm: relative flex h-109 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-8 sm:h-80"
+	class="border-offwhite bg-background relative flex h-109 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-8 sm:h-80"
 	onclick={() => inputRef?.focus()}
 	onkeydown={() => {}}
 	role="button"
