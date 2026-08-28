@@ -7,46 +7,23 @@ export type ParsedChunk = {
 	blur?: number;
 };
 
-export function parseInput(
+export function splitByMode(
 	input: string,
-	disappearanceMode: DisappearanceMode | undefined,
-	lineRef: HTMLDivElement | null,
+	disappearanceMode: Exclude<DisappearanceMode, "line">,
+): string[] {
+	const regexes: Record<string, RegExp> = {
+		sentence: /[^.!?]*[.!?]*/g,
+		word: /\S+\s*/g,
+	};
+	const regex = regexes[disappearanceMode] ?? regexes["word"];
+	return input.match(regex)?.filter(Boolean) ?? [];
+}
+
+export function applyDisappearance(
+	matchArray: string[],
+	disappearanceMode: DisappearanceMode,
 ): ParsedChunk[] {
-	if (!disappearanceMode) return [{ text: input, opacity: 100 }];
-
 	const { show, fade } = DISAPPEARANCE_CONFIG[disappearanceMode];
-	let matchArray: string[] = [];
-
-	if (disappearanceMode === "line") {
-		if (!lineRef) return [{ text: input, opacity: 100 }];
-
-		lineRef.textContent = "";
-		for (const match of input.match(/\S+\s*/g) ?? []) {
-			const span = document.createElement("span");
-			span.textContent = match;
-			lineRef.appendChild(span);
-		}
-		const spans = Array.from(lineRef.querySelectorAll("span"));
-		if (spans.length === 0) return [{ text: input, opacity: 100 }];
-
-		let top: number | null = null;
-		for (const span of spans) {
-			const roundedTop = Math.round(span.getBoundingClientRect().top);
-			if (top === null || roundedTop > top) {
-				matchArray.push("");
-				top = roundedTop;
-			}
-			matchArray[matchArray.length - 1] += span.textContent;
-		}
-	} else {
-		const regexes: Record<string, RegExp> = {
-			sentence: /[^.!?]*[.!?]*/g,
-			word: /\S+\s*/g,
-		};
-		const regex = regexes[disappearanceMode] ?? regexes["word"];
-		matchArray = input.match(regex)?.filter(Boolean) ?? [];
-	}
-
 	const matchArrayLn = matchArray.length;
 	const hideUntil = matchArrayLn - (show + fade);
 	const fadeUntil = matchArrayLn - show;
@@ -71,4 +48,41 @@ export function parseInput(
 		}
 		return { text: item, opacity: 100, blur: 0 };
 	});
+}
+
+export function parseInput(
+	input: string,
+	disappearanceMode: DisappearanceMode | undefined,
+	lineRef: HTMLDivElement | null,
+): ParsedChunk[] {
+	if (!disappearanceMode) return [{ text: input, opacity: 100 }];
+
+	let matchArray: string[] = [];
+
+	if (disappearanceMode === "line") {
+		if (!lineRef) return [{ text: input, opacity: 100 }];
+
+		lineRef.textContent = "";
+		for (const match of input.match(/\S+\s*/g) ?? []) {
+			const span = document.createElement("span");
+			span.textContent = match;
+			lineRef.appendChild(span);
+		}
+		const spans = Array.from(lineRef.querySelectorAll("span"));
+		if (spans.length === 0) return [{ text: input, opacity: 100 }];
+
+		let top: number | null = null;
+		for (const span of spans) {
+			const roundedTop = Math.round(span.getBoundingClientRect().top);
+			if (top === null || roundedTop > top) {
+				matchArray.push("");
+				top = roundedTop;
+			}
+			matchArray[matchArray.length - 1] += span.textContent;
+		}
+	} else {
+		matchArray = splitByMode(input, disappearanceMode);
+	}
+
+	return applyDisappearance(matchArray, disappearanceMode);
 }

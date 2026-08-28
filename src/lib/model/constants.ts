@@ -9,15 +9,15 @@ type DisappearanceConfigEntry = {
 
 export const DISAPPEARANCE_CONFIG = {
 	line: {
-		show: 3,
-		fade: 2,
+		show: 5,
+		fade: 1,
 	},
 	sentence: {
 		show: 4,
 		fade: 2,
 	},
 	word: {
-		show: 20,
+		show: 40,
 		fade: 10,
 	},
 } satisfies Record<DisappearanceMode, DisappearanceConfigEntry>;

@@ -76,6 +76,7 @@ Benefits:
 Recommendation:
 
 - `logic/parseInput.ts` for disappearance algorithm
+- `logic/canvasRender.ts` for text wrapping, layout, and canvas painting
 - `logic/timeout.svelte.ts` for timer/session timeout state
 - `logic/editor.svelte.ts` for selection/caret behavior
 - Keep the page component focused on composition and event wiring
