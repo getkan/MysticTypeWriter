@@ -17,10 +17,9 @@
 	import SoundOff from "$lib/components/icons/SoundOff.svelte";
 	import Typewriter from "$lib/components/icons/Typewriter.svelte";
 	import {
-		drawTypewriter,
-		layoutLines,
-		measureCanvas,
-	} from "$lib/features/typewriter/logic/canvasRender";
+		parseInput,
+		type ParsedChunk,
+	} from "$lib/features/typewriter/logic/parseInput";
 	import {
 		initiateTimeout,
 		destroyTimeout,
@@ -29,23 +28,26 @@
 	import {
 		focusEditor,
 		insertNewline,
-		readEditorText,
 	} from "$lib/features/typewriter/logic/editor";
 
 	let configState = $derived.by(() => getConfig());
 	let typewriterInput = $derived.by(() => getTypewriterInput());
 	const timeRemaining = $derived.by(() => getTimeRemaining());
 
-	let inputRef: HTMLDivElement | null = null;
-	let containerRef = $state<HTMLDivElement | null>(null);
-	let canvasRef = $state<HTMLCanvasElement | null>(null);
-	let canvasWidth = $state(0);
-	let canvasHeight = $state(0);
-	let cursorVisible = $state(true);
+	let inputRef: HTMLSpanElement | null = null;
+	let lineRef: HTMLDivElement | null = null;
+	let cursorRef: HTMLSpanElement | null = null;
 
-	let blinkTimer = -1;
-	let resizeObserver: ResizeObserver | null = null;
-	let previousLineCount = 1;
+	const checkCursorEdgeIntersection = () => {
+		if (!cursorRef || !configState.soundEffectsEnabled) return;
+		const parent = cursorRef.parentElement;
+		if (!parent) return;
+		const cursorRect = cursorRef.getBoundingClientRect();
+		const parentRect = parent.getBoundingClientRect();
+		if (cursorRect.right >= parentRect.right - 8) {
+			playReturnSound();
+		}
+	};
 
 	onMount(() => {
 		try {
@@ -66,59 +68,6 @@
 			localStorage.removeItem(STORAGE_KEY);
 			goto(resolve("/"));
 		}
-
-		blinkTimer = setInterval(() => {
-			cursorVisible = !cursorVisible;
-		}, 600);
-
-		if (containerRef) {
-			resizeObserver = new ResizeObserver(([entry]) => {
-				canvasWidth = entry.contentRect.width;
-				canvasHeight = entry.contentRect.height;
-			});
-			resizeObserver.observe(containerRef);
-		}
-	});
-
-	onDestroy(() => {
-		destroyTimeout();
-		if (blinkTimer !== -1) clearInterval(blinkTimer);
-		resizeObserver?.disconnect();
-	});
-
-	$effect(() => {
-		const canvas = canvasRef;
-		const width = canvasWidth;
-		const height = canvasHeight;
-		const input = typewriterInput;
-		const mode = configState.disappearanceMode;
-		const visible = cursorVisible;
-
-		if (!canvas || width === 0 || height === 0) return;
-
-		const ctx = canvas.getContext("2d");
-		if (!ctx) return;
-
-		const dpr = window.devicePixelRatio || 1;
-		canvas.width = Math.round(width * dpr);
-		canvas.height = Math.round(height * dpr);
-		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-		const metrics = measureCanvas(ctx, canvas, width);
-		const lines = layoutLines(input, mode, metrics.charsPerLine);
-
-		drawTypewriter(ctx, {
-			width,
-			height,
-			lines,
-			metrics,
-			cursorVisible: visible,
-		});
-
-		if (lines.length > previousLineCount && configState.soundEffectsEnabled) {
-			playReturnSound();
-		}
-		previousLineCount = lines.length;
 	});
 
 	const soundEnabled = $derived.by(() => getConfig().soundEffectsEnabled);
@@ -127,18 +76,29 @@
 		focusEditor(inputRef);
 	};
 
+	onDestroy(() => {
+		destroyTimeout();
+	});
+
+	let queueNewline = false;
 
 	const onkeydownTypewriter = (e: KeyboardEvent) => {
+		if(queueNewline){
+			insertNewline(inputRef);
+			queueNewline = false
+		}
+
 		if (e.key === "Enter") {
 			e.preventDefault();
-			insertNewline(inputRef);
-
-			setTypewriterInput(readEditorText(inputRef));
+			queueNewline = true
+			setTypewriterInput(inputRef?.innerText ?? "");
 			return;
 		}
 
-		const prevent = configState.strictEditing && (e.key === "Backspace" || e.key === "Delete")
-		if (prevent) {
+		if (
+			configState.strictEditing &&
+			(e.key === "Backspace" || e.key === "Delete")
+		) {
 			e.preventDefault();
 		}
 		if (
@@ -150,19 +110,25 @@
 			initiateTimeout();
 		}
 
-		if (configState.soundEffectsEnabled && !prevent) {
+		if (configState.soundEffectsEnabled) {
 			playTypewriterSound();
 		}
 		focusEditor(inputRef);
 	};
 
-	const inputTypewriter = () => {
-		setTypewriterInput(readEditorText(inputRef));
+	const inputTypewriter = (
+		e: Event & { currentTarget: EventTarget & HTMLSpanElement },
+	) => {
+		setTypewriterInput(e.currentTarget.innerText);
+		requestAnimationFrame(checkCursorEdgeIntersection);
 	};
+
+	const parsedChunks = $derived.by((): ParsedChunk[] =>
+		parseInput(typewriterInput, configState.disappearanceMode, lineRef),
+	);
 </script>
 
 <div
-	bind:this={containerRef}
 	class="border-offwhite bg-background relative flex h-109 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-8 sm:h-80"
 	onclick={() => inputRef?.focus()}
 	onkeydown={() => {}}
@@ -186,12 +152,14 @@
 		><span class="text-[2rem] leading-4">←</span>Back</a
 	>
 
-	<div class="absolute inset-0 overflow-hidden">
+	<div
+		class="absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_2.5rem,black_6.5rem)]"
+	>
 		<div
 			contenteditable="true"
 			role="textbox"
 			tabindex="0"
-			class="absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent caret-transparent outline-none background-red"
+			class="absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent outline-none"
 			spellcheck="false"
 			bind:this={inputRef}
 			onkeydown={onkeydownTypewriter}
@@ -199,10 +167,20 @@
 			onpaste={(e) => e.preventDefault()}
 		></div>
 
-		<canvas
-			bind:this={canvasRef}
-			class="text-offwhite pointer-events-none absolute inset-8 block leading-relaxed"
-		></canvas>
+		<div
+			class="pointer-events-none absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap"
+		>
+			{#each parsedChunks as chunk}
+				{@render Chunk(chunk.text, chunk.opacity, chunk.blur)}
+			{/each}<span
+				bind:this={cursorRef}
+				class="animate-blink ml-1 inline-block h-[1.1em] w-1 bg-current align-middle"
+			></span>
+		</div>
+		<div
+			bind:this={lineRef}
+			class="pointer-events-none invisible absolute right-8 bottom-8 left-8 text-left wrap-break-word whitespace-pre-wrap"
+		></div>
 	</div>
 	<button
 		onclick={onSoundToggle}
@@ -220,3 +198,7 @@
 		>Done!</a
 	>
 </div>
+
+{#snippet Chunk(text: string, opacity: number, blur: number = 0)}
+	<span style="opacity:{opacity}%; filter: blur({blur}px);">{text}</span>
+{/snippet}

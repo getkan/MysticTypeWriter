@@ -16,8 +16,25 @@ The current project includes:
 
 - a landing/configuration page
 - shared in-app typewriter configuration state
-- a typewriter route for the writing experience
+- a canvas-rendered typewriter route for the writing experience
+- a legacy DOM-rendered typewriter route kept for reference
 - a dark terminal-style theme
+
+## Rendering
+
+The typewriter route (`/typewriter`) draws the text on a `<canvas>` element:
+
+- a transparent `contenteditable` layer captures keystrokes and the caret
+- `lib/features/typewriter/logic/canvasRender.ts` wraps the text to the
+  monospace column width, maps the disappearance chunks onto characters, and
+  paints each segment with `globalAlpha` and a `blur()` canvas filter
+- lines fade out over the top three line heights as they scroll off
+- the caret is drawn on the canvas and blinks on a timer
+
+The disappearance rules themselves are shared with the DOM version through
+`splitByMode` and `applyDisappearance` in
+`lib/features/typewriter/logic/parseInput.ts`. The original DOM implementation
+is still available at `/legacy`.
 
 ## Roadmap
 
@@ -30,6 +47,7 @@ The current project includes:
 - [x] Add animations and sound effects
 - [x] Add timeout for inactivity
 - [x] Work on suggestions in docs
+- [x] Render the typewriter text on a canvas element
 - [ ] Exquisite Corpse game mode
   - Config: int players, int rounds, disappearanceMode = 'sentence', show = 1, fade = 1,
   - Each player writes for a set time or until they finish a sentence, then passes to the next player
@@ -106,6 +124,10 @@ src/
       typewriter/
         audio/
         logic/
+          canvasRender.ts
+          editor.ts
+          parseInput.ts
+          timeout.svelte.ts
     model/
       config.ts
       constants.ts
@@ -116,11 +138,12 @@ src/
   routes/
     +layout.svelte
     +page.svelte
+    legacy/
+      +page.svelte
     share/
       +page.svelte
     typewriter/
       +page.svelte
-    typewriter/
 ```
 
 ## Styling
@@ -129,6 +152,9 @@ The UI uses a dark, terminal-like palette defined in `src/app.css`, with Tailwin
 
 ## Additional docs
 
+- Specification: `docs/SPEC.md`
+- Roadmap: `docs/ROADMAP.md`
+- Tasks: `docs/TASKS.md`
 - Node backend setup guide: `docs/node-backend-setup.md`
 
 ## License
