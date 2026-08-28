@@ -80,10 +80,17 @@
 		destroyTimeout();
 	});
 
+	let queueNewline = false;
+
 	const onkeydownTypewriter = (e: KeyboardEvent) => {
+		if(queueNewline){
+			insertNewline(inputRef);
+			queueNewline = false
+		}
+
 		if (e.key === "Enter") {
 			e.preventDefault();
-			insertNewline(inputRef);
+			queueNewline = true
 			setTypewriterInput(inputRef?.innerText ?? "");
 			return;
 		}
