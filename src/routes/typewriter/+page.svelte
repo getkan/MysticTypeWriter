@@ -100,6 +100,10 @@
 		if (!ctx) return;
 
 		const dpr = window.devicePixelRatio || 1;
+		// A canvas is a replaced element, so `inset` alone will not size it: the
+		// intrinsic width/height attributes win. Set the CSS box explicitly.
+		canvas.style.width = `${width}px`;
+		canvas.style.height = `${height}px`;
 		canvas.width = Math.round(width * dpr);
 		canvas.height = Math.round(height * dpr);
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -162,7 +166,6 @@
 </script>
 
 <div
-	bind:this={containerRef}
 	class="border-offwhite bg-background relative flex h-109 w-[90vw] max-w-250 flex-col justify-end rounded-lg border-2 p-8 sm:h-80"
 	onclick={() => inputRef?.focus()}
 	onkeydown={() => {}}
@@ -186,12 +189,12 @@
 		><span class="text-[2rem] leading-4">←</span>Back</a
 	>
 
-	<div class="absolute inset-0 overflow-hidden">
+	<div bind:this={containerRef} class="absolute inset-8 overflow-hidden">
 		<div
 			contenteditable="true"
 			role="textbox"
 			tabindex="0"
-			class="absolute right-8 bottom-8 left-8 block text-left wrap-break-word whitespace-pre-wrap text-transparent caret-transparent outline-none background-red"
+			class="absolute right-0 bottom-0 left-0 block text-left wrap-break-word whitespace-pre-wrap text-transparent caret-transparent outline-none"
 			spellcheck="false"
 			bind:this={inputRef}
 			onkeydown={onkeydownTypewriter}
@@ -201,7 +204,7 @@
 
 		<canvas
 			bind:this={canvasRef}
-			class="text-offwhite pointer-events-none absolute inset-8 block leading-relaxed"
+			class="text-offwhite pointer-events-none absolute top-0 left-0 block leading-relaxed"
 		></canvas>
 	</div>
 	<button
